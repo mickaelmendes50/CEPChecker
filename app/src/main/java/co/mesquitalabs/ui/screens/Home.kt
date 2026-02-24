@@ -1,11 +1,11 @@
 package co.mesquitalabs.ui.screens
 
-import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,8 +17,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -39,6 +39,7 @@ import co.mesquitalabs.model.Address
 fun Home(modifier: Modifier = Modifier) {
     val cep = remember { mutableStateOf("") }
     val error = remember { mutableStateOf(false) }
+    val loading = remember { mutableStateOf(false) }
     val address = remember { mutableStateOf<Address?>(null) }
 
     Box(
@@ -101,25 +102,43 @@ fun Home(modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
+                    loading.value = true
                     getAddress(cep.value) { result ->
                         if (result == null) {
                             error.value = true
+                            loading.value = false
                         } else {
                             error.value = false
                             address.value = result
+                            loading.value = false
                         }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
                 ),
-                enabled = cep.value.length == 8,
+                enabled = cep.value.length == 8 && !loading.value,
+                modifier = modifier.animateContentSize()
             ) {
-                Text(
-                    text = "Buscar",
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                AnimatedContent(
+                    targetState = loading.value,
+                    label = "button_content_animation"
+                ) { loading ->
+                    if (loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Buscar",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
+                }
             }
+
             address.value?.let {
                 Card(
                     colors = CardDefaults.cardColors(
