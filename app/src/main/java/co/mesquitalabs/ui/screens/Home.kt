@@ -1,8 +1,11 @@
 package co.mesquitalabs.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,10 +32,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import co.mesquitalabs.api.getAddress
+import co.mesquitalabs.model.Address
 
 @Composable
 fun Home(modifier: Modifier = Modifier) {
     val cep = remember { mutableStateOf("") }
+    val error = remember { mutableStateOf(false) }
+    val address = remember { mutableStateOf<Address?>(null) }
 
     Box(
         modifier = modifier
@@ -60,6 +70,7 @@ fun Home(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineMedium,
             )
 
+
             OutlinedTextField(
                 value = cep.value,
                 onValueChange = { newValue ->
@@ -70,25 +81,72 @@ fun Home(modifier: Modifier = Modifier) {
                     if (newValue.length <= 8)
                         cep.value = filteredText
                 },
-                modifier = modifier.fillMaxWidth(),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 0.dp),
                 label = { Text("CEP") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
                 ),
                 shape = RoundedCornerShape(50),
+                isError = error.value
             )
 
+            if (cep.value.length < 8)
+            if (error.value)
+                Text(
+                    text = "CEP inválido"
+                )
+
             Button(
-                onClick = { },
+                onClick = {
+                    getAddress(cep.value) { result ->
+                        if (result == null) {
+                            error.value = true
+                        } else {
+                            error.value = false
+                            address.value = result
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
-                )
+                ),
+                enabled = cep.value.length == 8,
             ) {
                 Text(
                     text = "Buscar",
                     style = MaterialTheme.typography.headlineSmall
                 )
+            }
+            address.value?.let {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                    modifier = modifier
+                ) {
+                    Column(
+                        Modifier
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("CEP: ${it.cep}")
+                        Text("Estado: ${it.state}")
+                        Text("Cidade: ${it.city}")
+                        Text("Bairro: ${it.neighborhood}")
+                        Text("Rua: ${it.street}")
+                        it.latitude?.let { lat ->
+                            Text("Latitude: $lat")
+                        }
+                        it.longitude?.let { long ->
+                            Text("Longitude: $long")
+                        }
+                    }
+                }
             }
         }
     }
