@@ -22,7 +22,7 @@ fun getAddress(
 
         override fun onFailure(call: okhttp3.Call, e: IOException) {
             Log.e("HTTP", "Erro na requisição", e)
-            // erro => devolve null na main thread
+
             android.os.Handler(Looper.getMainLooper()).post {
                 onResult(null)
             }
@@ -48,7 +48,6 @@ fun getAddress(
                     ?.optString("longitude"),
             )
 
-            // volta para a main thread para atualizar estado do Compose
             android.os.Handler(Looper.getMainLooper()).post {
                 onResult(address)
             }
