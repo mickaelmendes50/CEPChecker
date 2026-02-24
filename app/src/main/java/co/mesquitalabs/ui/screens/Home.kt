@@ -73,34 +73,39 @@ fun Home(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineMedium,
             )
 
-
-            OutlinedTextField(
-                value = cep.value,
-                onValueChange = { newValue ->
-                    val filteredText = newValue.filter {
-                        !it.isWhitespace()
-                        && it != '\n'
-                    }
-                    if (newValue.length <= 8)
-                        cep.value = filteredText
-                },
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 0.dp),
-                label = { Text("CEP") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                shape = RoundedCornerShape(50),
-                isError = error.value
-            )
-
-            if (cep.value.length < 8)
-            if (error.value)
-                Text(
-                    text = "CEP inválido"
+            ) {
+                OutlinedTextField(
+                    value = cep.value,
+                    onValueChange = { newValue ->
+                        val filteredText = newValue.filter {
+                            !it.isWhitespace()
+                                    && it != '\n'
+                        }
+                        if (newValue.length <= 8)
+                            cep.value = filteredText
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 0.dp),
+                    label = { Text("CEP") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    shape = RoundedCornerShape(50),
+                    isError = error.value
                 )
+
+                if (error.value)
+                    Text(
+                        text = "CEP não encontrado",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+            }
 
             Button(
                 onClick = {
@@ -120,7 +125,7 @@ fun Home(modifier: Modifier = Modifier) {
                     containerColor = MaterialTheme.colorScheme.error,
                 ),
                 enabled = cep.value.length == 8 && !loading.value,
-                modifier = modifier.animateContentSize()
+                modifier = Modifier.animateContentSize()
             ) {
                 AnimatedContent(
                     targetState = loading.value,
