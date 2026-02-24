@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -53,15 +54,16 @@ fun Home(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
-               modifier = modifier
-                   .size(80.dp)
-                   .clip(shape = RoundedCornerShape(50))
-                   .background(MaterialTheme.colorScheme.error)
+                modifier = modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.error),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
-                    modifier = modifier.size(180.dp),
+                    contentDescription = "Location icon",
+                    modifier = Modifier.fillMaxSize(0.7f),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
